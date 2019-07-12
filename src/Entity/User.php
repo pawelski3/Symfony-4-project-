@@ -4,10 +4,12 @@ namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\User\UserInterface;
+use Symfony\Component\Security\Core\User\EquatableInterface;
+
 /**
  * @ORM\Entity(repositoryClass="App\Repository\UserRepository")
  */
-class User implements UserInterface, \Serializable
+class User implements UserInterface, \Serializable, EquatableInterface
 {
     /**
      * @ORM\Id()
@@ -31,6 +33,12 @@ class User implements UserInterface, \Serializable
      */
     private $email;
 
+    /**
+     * @ORM\Column(type="string", length=255, nullable=true)
+     */
+    private $locale;
+    
+    
     public function getId(): ?int
     {
         return $this->id;
@@ -86,7 +94,8 @@ class User implements UserInterface, \Serializable
             $this->id,
             $this->username,
             $this->email,
-            $this->password
+            $this->password,
+            $this->locale
         ]);
     }
     
@@ -95,8 +104,30 @@ class User implements UserInterface, \Serializable
             $this->id,
             $this->username,
             $this->email,
-            $this->password
+            $this->password,
+            $this->locale    
         )=unserialize($string,['allowed_classes'=>false]);
+    }
+
+    public function getLocale(): ?string
+    {
+        return $this->locale;
+    }
+
+    public function setLocale(string $locale): self
+    {
+        $this->locale = $locale;
+
+        return $this;
+    }
+ 
+    public function isEqualTo(UserInterface $user){
+        if ($user instanceof self){
+            if($user->getLocale()!=$this->locale){
+                return false;
+            }
+        }
+        return true;
     }
     
 }
